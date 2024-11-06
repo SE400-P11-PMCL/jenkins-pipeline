@@ -1,0 +1,8 @@
+# Jenkins Sandbox
+version: "3"
+services:
+  app:
+    container_name: cicd-se400
+    image: ducminh210503/cicd-se400
+    ports:
+      - "8081:8081"
