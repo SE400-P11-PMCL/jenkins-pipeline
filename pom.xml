@@ -39,5 +39,6 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
+        <finalName>cicd-se400</finalName>
     </build>
 </project>
