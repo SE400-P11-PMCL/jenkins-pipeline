@@ -54,7 +54,3 @@ This will start the Jenkins server.
 9. **Build Pipeline**:
     - Go back to the main dashboard and open the pipeline you created.
     - Choose the 'Build Now' option to trigger the pipeline.
-
-This setup will automate the process of pulling code from your GitHub repository, building a Docker image, and pushing it to a Docker registry using Jenkins. Make sure to adapt these instructions to your specific project and preferences.
-
-Feel free to customize the configurations and settings according to your requirements.
