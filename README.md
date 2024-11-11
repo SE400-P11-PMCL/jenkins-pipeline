@@ -47,7 +47,7 @@ This will start the Jenkins server.
         - ID: dockerhub-pwd
 
 8. **Configure Tools**:
-    - Navigate to 'Manage Jenkins' > 'Global Tool Configuration'.
+    - Navigate to 'Manage Jenkins' > 'Global Tool Configuration'
     - Add Maven in the Maven installation section with the name 'maven_tool'.
     - Similarly, add Docker in the Docker installation section.
 
