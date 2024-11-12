@@ -53,4 +53,4 @@ This will start the Jenkins server.
 
 9. **Build Pipeline**:
     - Go back to the main dashboard and open the pipeline you created.
-    - Choose the 'Build Now' option to trigger the pipeline
+    - Choose the 'Build Now' option to trigger the pipeline.
