@@ -15,19 +15,9 @@ pipeline {
             }
         }
         stage('SonarQube Analysis') {
-            environment {
-                SONAR_TOKEN = credentials('sonartoken')
-            }
-            steps {
-                script {
-                    def scannerHome = tool 'SonarScanner'
-                    sh """
-                        ${scannerHome}/bin/sonar-scanner \
-                        -Dsonar.projectKey=your-project-key \
-                        -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=${SONAR_TOKEN}
-                    """
-                }
+            def mvn = tool 'maven_tool';
+            withSonarQubeEnv() {
+              sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=cicd-se400"
             }
         }
         stage('Build docker image') {
