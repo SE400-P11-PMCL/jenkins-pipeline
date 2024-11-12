@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        SONAR_TOKEN = credentials('sonartoken')
+    }
     tools {
         maven 'maven_tool'
     }
@@ -15,9 +18,15 @@ pipeline {
             }
         }
         stage('SonarQube Analysis') {
-            def mvn = tool 'maven_tool';
-            withSonarQubeEnv() {
-              sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=cicd-se400"
+            steps {
+                script {
+                    sh """
+                        mvn sonar:sonar \
+                        -Dsonar.projectKey=cicd-se400 \
+                        -Dsonar.host.url=http://13.212.202.222:9000 \
+                        -Dsonar.login=${SONAR_TOKEN}
+                    """
+                }
             }
         }
         stage('Build docker image') {
