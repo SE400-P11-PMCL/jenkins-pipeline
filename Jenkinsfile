@@ -12,13 +12,6 @@ pipeline {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/SE400-P11-PMCL/jenkins-pipeline']])
             }
         }
-        stage('Test Docker') {
-            steps {
-                script {
-                    sh 'docker --version'
-                }
-            }
-        }
         stage('Build Maven') {
             steps {
                 sh 'mvn clean install'
