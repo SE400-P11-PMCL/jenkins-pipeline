@@ -4,10 +4,30 @@ pipeline {
         maven 'maven_tool'
     }
     stages {
-        stage('Build Maven') {
+        stage('Checkout Code') {
             steps {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/SE400-P11-PMCL/jenkins-pipeline']])
+            }
+        }
+        stage('Build Maven') {
+            steps {
                 sh 'mvn clean install'
+            }
+        }
+        stage('SonarQube Analysis') {
+            environment {
+                SONAR_TOKEN = credentials('sonartoken')
+            }
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    sh """
+                        ${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=your-project-key \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=${SONAR_TOKEN}
+                    """
+                }
             }
         }
         stage('Build docker image') {
