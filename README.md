@@ -4,8 +4,8 @@ This guide will help you set up Jenkins to automate the process of pulling a Git
 
 ## Prerequisites
 
-- Docker and Docker Compose are installed on your system.
-- You have a GitHub repository that contains the code and Dockerfile for your application.
+- Docker and Docker Compose are installed on your system
+- You have a GitHub repository that contains the code and Dockerfile for your application
 - You have a Docker Hub account for pushing Docker images.
 
 ## Steps
