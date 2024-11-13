@@ -11,7 +11,7 @@ This guide will help you set up Jenkins to automate the process of pulling a Git
 ## Steps
 
 1. **Update Jenkinsfile**:
-   Open the `Jenkinsfile` in your repository and change the Docker registry username and update the image tag according to your naming convention.
+   Open the `Jenkinsfile` in your repository and change the Docker registry username and update the image tag according to your naming convention
 
 2. **Run Jenkins**:
    Start Jenkins using the following command:
