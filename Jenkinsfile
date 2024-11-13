@@ -47,17 +47,17 @@ pipeline {
     post {
         success {
             emailext(
-                subject: 'Jenkins Pipeline Success - ${env.JOB_NAME} #${env.BUILD_NUMBER}',
-                body: 'The pipeline ${env.JOB_NAME} #${env.BUILD_NUMBER} was successful. View details at: ${env.BUILD_URL}',
+                subject: 'Pipeline Succeeded',
+                body: 'Pipeline has succeeded.',
                 to: 'vuducminh210503@gmail.com'
-                )
+            )
         }
         failure {
             emailext(
-                subject: 'Jenkins Pipeline Failed - ${env.JOB_NAME} #${env.BUILD_NUMBER}',
-                body: 'The pipeline ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. View details at: ${env.BUILD_URL}',
+                subject: 'Pipeline Failed',
+                body: 'Pipeline has failed.',
                 to: 'vuducminh210503@gmail.com'
-                )
+            )
         }
     }
 }
