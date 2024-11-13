@@ -24,7 +24,7 @@ This will start the Jenkins server
    Open your web browser and navigate to `http://localhost:8080` to access the Jenkins web interface
 
 4. **Login to Jenkins**:
-   You'll need the initial admin password to log in. You can find this password in the console where you started Jenkins or at `/var/jenkins_home/secrets/initialAdminPassword`. Follow the prompts to set up Jenkins.
+   You'll need the initial admin password to log in. You can find this password in the console where you started Jenkins or at `/var/jenkins_home/secrets/initialAdminPassword`. Follow the prompts to set up Jenkins
 
 5. **Install Plugins**:
    Choose the 'Install suggested plugins' option during the initial setup. This will install the necessary plugins for your Jenkins instance.
