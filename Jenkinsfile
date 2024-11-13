@@ -58,7 +58,6 @@ pipeline {
                 body: 'The pipeline ${env.JOB_NAME} #${env.BUILD_NUMBER} failed. View details at: ${env.BUILD_URL}',
                 to: 'vuducminh210503@gmail.com'
                 )
-            }
         }
     }
 }
