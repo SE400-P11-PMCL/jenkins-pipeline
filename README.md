@@ -6,19 +6,19 @@ This guide will help you set up Jenkins to automate the process of pulling a Git
 
 - Docker and Docker Compose are installed on your system
 - You have a GitHub repository that contains the code and Dockerfile for your application
-- You have a Docker Hub account for pushing Docker images.
+- You have a Docker Hub account for pushing Docker images
 
 ## Steps
 
 1. **Update Jenkinsfile**:
-   Open the `Jenkinsfile` in your repository and change the Docker registry username and update the image tag according to your naming convention.
+   Open the `Jenkinsfile` in your repository and change the Docker registry username and update the image tag according to your naming convention
 
 2. **Run Jenkins**:
    Start Jenkins using the following command:
    ```bash
    docker-compose -f docker-compose.jenkins.yml up
    ```
-This will start the Jenkins server.
+This will start the Jenkins server
 
 3. **Access Jenkins**:
    Open your web browser and navigate to `http://localhost:8080` to access the Jenkins web interface.
