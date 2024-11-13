@@ -18,7 +18,7 @@ This guide will help you set up Jenkins to automate the process of pulling a Git
    ```bash
    docker-compose -f docker-compose.jenkins.yml up
    ```
-This will start the Jenkins server.
+This will start the Jenkins server
 
 3. **Access Jenkins**:
    Open your web browser and navigate to `http://localhost:8080` to access the Jenkins web interface.
