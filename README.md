@@ -1,10 +1,10 @@
 # Basic Jenkins pipeline
 
-This guide will help you set up Jenkins to automate the process of pulling a Git repository, building a Docker image, and pushing it to a Docker registry. In this example, we'll be using a Jenkins pipeline to achieve this workflow.
+This guide will help you set up Jenkins to automate the process of pulling a Git repository, building a Docker image, and pushing it to a Docker registry. In this example, we'll be using a Jenkins pipeline to achieve this workflow
 
 ## Prerequisites
 
-- Docker and Docker Compose are installed on your system
+- Docker and Docker Compose are installed on your system.
 - You have a GitHub repository that contains the code and Dockerfile for your application
 - You have a Docker Hub account for pushing Docker images
 
@@ -27,7 +27,7 @@ This will start the Jenkins server
    You'll need the initial admin password to log in. You can find this password in the console where you started Jenkins or at `/var/jenkins_home/secrets/initialAdminPassword`. Follow the prompts to set up Jenkins
 
 5. **Install Plugins**:
-   Choose the 'Install suggested plugins' option during the initial setup. This will install the necessary plugins for your Jenkins instance.
+   Choose the 'Install suggested plugins' option during the initial setup. This will install the necessary plugins for your Jenkins instance
 
 6. **Configure Pipeline**:
     - From the main dashboard, create a new pipeline item.
