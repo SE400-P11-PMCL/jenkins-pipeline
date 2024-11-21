@@ -30,7 +30,7 @@ This will start the Jenkins server
    Choose the 'Install suggested plugins' option during the initial setup. This will install the necessary plugins for your Jenkins instance
 
 6. **Configure Pipeline**:
-    - From the main dashboard, create a new pipeline item.
+    - From the main dashboard, create a new pipeline item
     - In the 'GitHub project' field, enter the URL of your GitHub repository.
     - Choose 'GitHub hook trigger for GITScm polling' in the build triggers section.
     - Select 'Pipeline script from SCM' in the pipeline section.
