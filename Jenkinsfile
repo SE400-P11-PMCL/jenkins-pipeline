@@ -14,7 +14,17 @@ pipeline {
         }
         stage('Build Maven') {
             steps {
-                sh 'mvn clean install'
+                sh 'mvn clean package'
+            }
+        }
+        stage('Unit Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('Integration Test') {
+            steps {
+                sh 'mvn verify'
             }
         }
         stage('SonarQube Analysis') {
