@@ -1,4 +1,4 @@
-# Basic Jenkins pipeline..
+# Basic Jenkins pipeline.
 
 This guide will help you set up Jenkins to automate the process of pulling a Git repository, building a Docker image, and pushing it to a Docker registry. In this example, we'll be using a Jenkins pipeline to achieve this workflow
 
