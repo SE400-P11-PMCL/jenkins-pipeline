@@ -41,7 +41,7 @@ pipeline {
         }
         stage('Push image to Hub') {
             steps {
-                withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
+                withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
                     sh 'docker login -u ducminh210503 -p ${dockerhubpwd}'
                 }
                 sh 'docker tag ducminh210503/cicd-se400 ducminh210503/cicd-se400'
