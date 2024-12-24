@@ -54,14 +54,16 @@ pipeline {
             emailext(
                 subject: 'Pipeline Succeeded',
                 body: 'Pipeline has succeeded.',
-                to: 'vuducminh210503@gmail.com'
+                to: 'vuducminh210503@gmail.com',
+                from: '21522348@gm.uit.edu.vn'
             )
         }
         failure {
             emailext(
                 subject: 'Pipeline Failed',
                 body: 'Pipeline has failed.',
-                to: 'vuducminh210503@gmail.com'
+                to: 'vuducminh210503@gmail.com',
+                from: '21522348@gm.uit.edu.vn'
             )
         }
     }
