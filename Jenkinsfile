@@ -28,7 +28,7 @@ pipeline {
                     sh """
                         mvn sonar:sonar \
                         -Dsonar.projectKey=cicd-se400 \
-                        -Dsonar.host.url=http://13.212.143.236:9000 \
+                        -Dsonar.host.url=http://localhost:9001 \
                         -Dsonar.login=${SONAR_TOKEN}
                     """
                 }
@@ -46,6 +46,26 @@ pipeline {
                 }
                 sh 'docker tag ducminh210503/cicd-se400 ducminh210503/cicd-se400'
                 sh 'docker push ducminh210503/cicd-se400'
+            }
+        }
+        stage('Deliver for development') {
+            when {
+                branch 'development'
+            }
+            steps {
+                sh './jenkins/scripts/deliver-for-development.sh'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh './jenkins/scripts/kill.sh'
+            }
+        }
+        stage('Deploy for production') {
+            when {
+                branch 'production'
+            }
+            steps {
+                sh './jenkins/scripts/deploy-for-production.sh'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh './jenkins/scripts/kill.sh'
             }
         }
     }
