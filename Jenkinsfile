@@ -2,6 +2,7 @@ pipeline {
     agent any
     environment {
         SONAR_TOKEN = credentials('sonartoken')
+        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
     }
     tools {
         maven 'maven_tool'
