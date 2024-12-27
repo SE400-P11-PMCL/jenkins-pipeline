@@ -8,6 +8,11 @@ pipeline {
         maven 'maven_tool'
     }
     stages {
+        stage("Cleanup Workspace") {
+            steps {
+                cleanWs()
+            }
+        }
         stage('Checkout Code') {
             steps {
                 checkout scmGit(branches: [[name: '*/main']],
