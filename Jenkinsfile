@@ -7,6 +7,9 @@ pipeline {
     tools {
         maven 'maven_tool'
     }
+    options {
+        skipDefaultCheckout(true)
+    }
     stages {
         stage("Cleanup Workspace") {
             steps {
@@ -58,18 +61,22 @@ pipeline {
         }
     }
     post {
-        success {
+        always {
+            cleanWs(cleanWhenNotBuilt: false,
+                                deleteDirs: true,
+                                disableDeferredWipeout: true,
+                                notFailBuild: true,
+                                patterns: [[pattern: '.gitignore', type: 'INCLUDE'],
+                                           [pattern: '.propsfile', type: 'EXCLUDE']])
             emailext(
-                subject: 'Pipeline Succeeded',
-                body: 'Pipeline has succeeded.',
-                to: 'vuducminh210503@gmail.com'
-            )
-        }
-        failure {
-            emailext(
-                subject: 'Pipeline Failed',
-                body: 'Pipeline has failed.',
-                to: 'vuducminh210503@gmail.com'
+                subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.result}",
+                body: """
+                Job: ${env.JOB_NAME}
+                Build Number: ${env.BUILD_NUMBER}
+                Build Status: ${currentBuild.result}
+                Build URL: ${env.BUILD_URL}
+                """,
+                to: "vuducminh210503@gmail.com"
             )
         }
     }
