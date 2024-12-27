@@ -9,63 +9,45 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/SE400-P11-PMCL/jenkins-pipeline']])
+                checkout scmGit(branches: [[name: '*/main']],
+                    extensions: [],
+                    userRemoteConfigs: [[url: 'https://github.com/SE400-P11-PMCL/jenkins-pipeline.git']])
             }
         }
         stage('Build Maven') {
             steps {
-                sh 'mvn clean package'
+                bat 'mvn clean package'
             }
         }
         stage('Unit Test') {
             steps {
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    sh """
-                        mvn sonar:sonar \
-                        -Dsonar.projectKey=cicd-se400 \
-                        -Dsonar.host.url=http://localhost:9001 \
-                        -Dsonar.login=${SONAR_TOKEN}
+                    bat """
+                        mvn sonar:sonar ^
+                        -Dsonar.projectKey=cicd-se400 ^
+                        -Dsonar.host.url=http://localhost:9001 ^
+                        -Dsonar.login=%SONAR_TOKEN%
                     """
                 }
             }
         }
-        stage('Build docker image') {
+        stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ducminh210503/cicd-se400 .'
+                bat 'docker build -t ducminh210503/cicd-se400 .'
             }
         }
-        stage('Push image to Hub') {
+        stage('Push Docker Image') {
             steps {
                 withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
-                    sh 'docker login -u ducminh210503 -p ${dockerhubpwd}'
+                    bat 'docker login -u ducminh210503 -p %dockerhubpwd%'
                 }
-                sh 'docker tag ducminh210503/cicd-se400 ducminh210503/cicd-se400'
-                sh 'docker push ducminh210503/cicd-se400'
-            }
-        }
-        stage('Deliver for development') {
-            when {
-                branch 'development'
-            }
-            steps {
-                sh './jenkins/scripts/deliver-for-development.sh'
-                input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                sh './jenkins/scripts/kill.sh'
-            }
-        }
-        stage('Deploy for production') {
-            when {
-                branch 'production'
-            }
-            steps {
-                sh './jenkins/scripts/deploy-for-production.sh'
-                input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                sh './jenkins/scripts/kill.sh'
+                bat 'docker tag ducminh210503/cicd-se400 ducminh210503/cicd-se400'
+                bat 'docker push ducminh210503/cicd-se400'
             }
         }
     }
