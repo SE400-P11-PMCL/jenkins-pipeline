@@ -24,6 +24,11 @@ pipeline {
                     userRemoteConfigs: [[url: 'https://github.com/SE400-P11-PMCL/jenkins-pipeline.git']])
             }
         }
+        stage('Verify Kubernetes') {
+            steps {
+                bat 'kubectl get pods'
+            }
+        }
         stage('Build Maven') {
             steps {
                 bat 'mvn clean package -DskipTests'
@@ -58,11 +63,6 @@ pipeline {
                 }
                 bat 'docker tag ducminh210503/cicd-se400 ducminh210503/cicd-se400'
                 bat 'docker push ducminh210503/cicd-se400'
-            }
-        }
-        stage('Verify Kubernetes') {
-            steps {
-                bat 'kubectl get pods'
             }
         }
     }
