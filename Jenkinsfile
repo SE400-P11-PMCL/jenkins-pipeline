@@ -3,7 +3,7 @@ pipeline {
     environment {
         SONAR_TOKEN = credentials('sonartoken')
         PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
-        KUBECONFIG = "C:\Program Files\Docker\Docker\resources\bin\kubectl.exe"
+        KUBECONFIG = "C:\\Program Files\\Docker\\Docker\\resources\\bin\\kubectl.exe"
     }
     tools {
         maven 'maven_tool'
