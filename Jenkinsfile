@@ -3,6 +3,7 @@ pipeline {
     environment {
         SONAR_TOKEN = credentials('sonartoken')
         PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
+        KUBECONFIG = "C:\Program Files\Docker\Docker\resources\bin\kubectl.exe"
     }
     tools {
         maven 'maven_tool'
@@ -57,6 +58,11 @@ pipeline {
                 }
                 bat 'docker tag ducminh210503/cicd-se400 ducminh210503/cicd-se400'
                 bat 'docker push ducminh210503/cicd-se400'
+            }
+        }
+        stage('Verify Kubernetes') {
+            steps {
+                bat 'kubectl get pods'
             }
         }
     }
