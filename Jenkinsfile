@@ -26,7 +26,7 @@ pipeline {
         }
         stage('Verify Kubernetes') {
             steps {
-                bat 'kubectl get pods'
+                bat 'kubectl get namespaces'
             }
         }
         stage('Build Maven') {
