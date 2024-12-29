@@ -4,12 +4,19 @@ pipeline {
         SONAR_TOKEN = credentials('sonartoken')
         PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
         KUBECONFIG = "C:\\Users\\Admin\\.kube\\config"
+        DOCKER_IMAGE = "cicd-se400"
+        HELM_CHART = "D:\\Workspace\\Reference\\cicd\\deploy"
+        KUBERNETES_NAMESPACE_DEV = "dev"
+        KUBERNETES_NAMESPACE_STAGING = "staging"
+        KUBERNETES_NAMESPACE_PROD = "prod"
     }
     tools {
         maven 'maven_tool'
     }
     options {
         skipDefaultCheckout(true)
+        timeout(time: 60, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
     }
     stages {
         stage("Cleanup Workspace") {
@@ -17,16 +24,32 @@ pipeline {
                 cleanWs()
             }
         }
+//         stage('Checkout Code') {
+//             steps {
+//                 checkout scmGit(branches: [[name: '*/main']],
+//                     extensions: [],
+//                     userRemoteConfigs: [[url: 'https://github.com/SE400-P11-PMCL/jenkins-pipeline.git']])
+//             }
+//         }
         stage('Checkout Code') {
             steps {
-                checkout scmGit(branches: [[name: '*/main']],
-                    extensions: [],
-                    userRemoteConfigs: [[url: 'https://github.com/SE400-P11-PMCL/jenkins-pipeline.git']])
-            }
-        }
-        stage('Verify Kubernetes') {
-            steps {
-                bat 'kubectl get namespaces'
+                script {
+                    if (params.COMMIT_SHA) {
+                        echo "Checking out commit ${params.COMMIT_SHA}"
+                        checkout([$class: 'GitSCM',
+                                  branches: [[name: params.COMMIT_SHA]],
+                                  userRemoteConfigs: [[url: 'https://github.com/SE400-P11-PMCL/jenkins-pipeline.git']]
+                        ])
+                    } else {
+                        echo "Checking out branch ${env.BRANCH_NAME}"
+                        checkout scm
+                    }
+
+                    env.GIT_BRANCH_NAME = env.BRANCH_NAME ?: sh(
+                        script: 'git rev-parse --abbrev-ref HEAD',
+                        returnStdout: true
+                    ).trim()
+                }
             }
         }
         stage('Build Maven') {
@@ -53,16 +76,59 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t ducminh210503/cicd-se400 .'
+                try {
+                    bat """
+                        docker build -t ducminh210503/${DOCKER_IMAGE} .
+                    """
+                } catch (Exception e) {
+                    echo "Error: ${e}"
+                    currentBuild.result = 'FAILURE'
+                    error("Failed to build Docker image: ${e.message}")
+                }
             }
         }
         stage('Push Docker Image') {
+            env.IMAGE_TAG = "${env.GIT_BRANCH_NAME}-${env.BUILD_NUMBER}"
             steps {
-                withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
-                    bat 'docker login -u ducminh210503 -p %dockerhubpwd%'
+                try {
+                    withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
+                        bat 'docker login -u ducminh210503 -p %dockerhubpwd%'
+                    }
+                    bat """docker tag ducminh210503/cicd-se400 ducminh210503/${DOCKER_IMAGE}:${IMAGE_TAG}"""
+                    bat """docker push ducminh210503/${DOCKER_IMAGE}:${IMAGE_TAG}"""
                 }
-                bat 'docker tag ducminh210503/cicd-se400 ducminh210503/cicd-se400'
-                bat 'docker push ducminh210503/cicd-se400'
+                catch (Exception e) {
+                    echo "Error: ${e}"
+                    currentBuild.result = 'FAILURE'
+                    error("Failed to push Docker image: ${e.message}")
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            when {
+                branch pattern: "^(feature|develop|release|main)$"
+            }
+            steps {
+                script {
+                    def namespace = getKubernetesNamespace(env.GIT_BRANCH_NAME)
+                    echo "Deploying to Kubernetes Namespace: ${namespace}"
+
+                    try {
+                        bat """
+                            helm upgrade --install cicd-se400 ${HELM_CHART} ^
+                                --namespace ${namespace} ^
+                                --set image.repository=${DOCKER_REGISTRY}/${DOCKER_IMAGE} ^
+                                --set image.tag=${IMAGE_TAG}
+                        """
+                    } catch (Exception e) {
+                        if (params.ROLLBACK_ON_FAILURE) {
+                            echo "Deployment failed, rolling back..."
+                            bat "helm rollback your-app --namespace ${namespace}"
+                        }
+                        error("Deployment to ${namespace} failed: ${e.message}")
+                    }
+                }
             }
         }
     }
@@ -77,13 +143,25 @@ pipeline {
             emailext(
                 subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.result}",
                 body: """
-                Job: ${env.JOB_NAME}
-                Build Number: ${env.BUILD_NUMBER}
-                Build Status: ${currentBuild.result}
-                Build URL: ${env.BUILD_URL}
+                Job: ${env.JOB_NAME} \n
+                Build Number: ${env.BUILD_NUMBER} \n
+                Build Status: ${currentBuild.result} \n
+                Build URL: ${env.BUILD_URL} \n
                 """,
                 to: "vuducminh210503@gmail.com"
             )
         }
+    }
+}
+
+def getKubernetesNamespace(branchName) {
+    if (branchName.startsWith("feature")) {
+        return KUBERNETES_NAMESPACE_DEV
+    } else if (branchName.startsWith("release")) {
+        return KUBERNETES_NAMESPACE_STAGING
+    } else if (branchName == "main") {
+        return KUBERNETES_NAMESPACE_PROD
+    } else {
+        error("Branch ${branchName} is not allowed for deployment")
     }
 }
