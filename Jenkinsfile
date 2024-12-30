@@ -80,7 +80,7 @@ pipeline {
                 script {
                     try {
                         bat """
-                            docker build -t ducminh210503/${DOCKER_IMAGE} .
+                            docker build -t ${DOCKER_IMAGE} .
                         """
                     } catch (Exception e) {
                         echo "Error: ${e}"
@@ -101,8 +101,11 @@ pipeline {
                         withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
                             bat 'docker login -u ducminh210503 -p %dockerhubpwd%'
                         }
-                        bat """docker tag ducminh210503/cicd-se400 ducminh210503/${DOCKER_IMAGE}:${IMAGE_TAG}"""
+                        bat """docker tag cicd-se400 ducminh210503/${DOCKER_IMAGE}:${IMAGE_TAG}"""
                         bat """docker push ducminh210503/${DOCKER_IMAGE}:${IMAGE_TAG}"""
+
+                        bat """docker rmi ${DOCKER_IMAGE} -f"""
+                        bat """docker rmi ducminh210503/${DOCKER_IMAGE}:${IMAGE_TAG} -f"""
                     }
                     catch (Exception e) {
                         echo "Error: ${e}"
