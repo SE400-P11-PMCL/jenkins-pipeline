@@ -76,14 +76,16 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                try {
-                    bat """
-                        docker build -t ducminh210503/${DOCKER_IMAGE} .
-                    """
-                } catch (Exception e) {
-                    echo "Error: ${e}"
-                    currentBuild.result = 'FAILURE'
-                    error("Failed to build Docker image: ${e.message}")
+                script {
+                    try {
+                        bat """
+                            docker build -t ducminh210503/${DOCKER_IMAGE} .
+                        """
+                    } catch (Exception e) {
+                        echo "Error: ${e}"
+                        currentBuild.result = 'FAILURE'
+                        error("Failed to build Docker image: ${e.message}")
+                    }
                 }
             }
         }
