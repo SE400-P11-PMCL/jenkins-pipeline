@@ -9,7 +9,6 @@ pipeline {
         KUBERNETES_NAMESPACE_DEV = "dev"
         KUBERNETES_NAMESPACE_STAGING = "staging"
         KUBERNETES_NAMESPACE_PROD = "prod"
-        IMAGE_TAG = ""
     }
     tools {
         maven 'maven_tool'
@@ -92,11 +91,8 @@ pipeline {
         }
         stage('Push Docker Image') {
             steps {
-                env.IMAGE_TAG = "${env.GIT_BRANCH_NAME}-${env.BUILD_NUMBER}"
-                echo "Git Branch Name: ${env.GIT_BRANCH_NAME}"
-                echo "Build Number: ${env.BUILD_NUMBER}"
-                echo "Pushing Docker image with tag: ${IMAGE_TAG}"
                 script {
+                    env.IMAGE_TAG = "${env.GIT_BRANCH_NAME}-${env.BUILD_NUMBER}"
                     try {
                         withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
                             bat 'docker login -u ducminh210503 -p %dockerhubpwd%'
