@@ -113,7 +113,9 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             when {
-                branch pattern: '^(feature|develop|release|main)$'
+                expression {
+                    env.BRANCH_NAME ==~ /(feature|develop|release|main)/
+                }
             }
             steps {
                 script {
