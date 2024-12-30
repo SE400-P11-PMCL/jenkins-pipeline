@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    parameters {
+        string(name: 'COMMIT_SHA', defaultValue: '', description: 'Commit SHA to checkout')
+        booleanParam(name: 'ROLLBACK_ON_FAILURE', defaultValue: true, description: 'Rollback on failure')
+    }
     environment {
         SONAR_TOKEN = credentials('sonartoken')
         PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;D:\\helm-v3.16.3-windows-amd64\\windows-amd64;${env.PATH}"
@@ -9,6 +13,7 @@ pipeline {
         KUBERNETES_NAMESPACE_DEV = "dev"
         KUBERNETES_NAMESPACE_STAGING = "staging"
         KUBERNETES_NAMESPACE_PROD = "prod"
+        TRIVY_HOME="D:\\trivy_0.58.1_windows-64bit"
     }
     tools {
         maven 'maven_tool'
@@ -24,13 +29,6 @@ pipeline {
                 cleanWs()
             }
         }
-//         stage('Checkout Code') {
-//             steps {
-//                 checkout scmGit(branches: [[name: '*/main']],
-//                     extensions: [],
-//                     userRemoteConfigs: [[url: 'https://github.com/SE400-P11-PMCL/jenkins-pipeline.git']])
-//             }
-//         }
         stage('Checkout Code') {
             steps {
                 script {
@@ -89,6 +87,21 @@ pipeline {
                 }
             }
         }
+        stage('Scan Docker Image') {
+            steps {
+                script {
+                    try {
+                        bat """
+                            trivy image --exit-code 0 --severity HIGH,CRITICAL --no-progress ${DOCKER_IMAGE}
+                        """
+                    } catch (Exception e) {
+                        echo "Error: ${e}"
+                        currentBuild.result = 'FAILURE'
+                        error("Failed to scan Docker image: ${e.message}")
+                    }
+                }
+            }
+        }
         stage('Push Docker Image') {
             steps {
                 script {
@@ -114,7 +127,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             when {
                 expression {
-                    env.BRANCH_NAME ==~ /(feature|develop|release|main)/
+                    env.BRANCH_NAME ==~ /(feature|staging|main)/
                 }
             }
             steps {
@@ -124,7 +137,7 @@ pipeline {
 
                     try {
                         bat """
-                            helm upgrade --install cicd-se400 ${HELM_CHART} ^
+                            helm upgrade --install ${DOCKER_IMAGE} ${HELM_CHART} ^
                                 --namespace ${namespace} ^
                                 --set image.tag=${IMAGE_TAG}
                         """
