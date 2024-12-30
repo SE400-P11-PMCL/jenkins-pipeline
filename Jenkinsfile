@@ -89,6 +89,9 @@ pipeline {
         }
         stage('Push Docker Image') {
             env.IMAGE_TAG = "${env.GIT_BRANCH_NAME}-${env.BUILD_NUMBER}"
+            echo "Git Branch Name: ${env.GIT_BRANCH_NAME}"
+            echo "Build Number: ${env.BUILD_NUMBER}"
+            echo "Pushing Docker image with tag: ${IMAGE_TAG}"
             steps {
                 try {
                     withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
