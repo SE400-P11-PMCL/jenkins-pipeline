@@ -108,12 +108,6 @@ pipeline {
                         bat """
                             trivy image --severity HIGH,CRITICAL --no-progress --format table -o trivy-report.html ${DOCKER_IMAGE}
                         """
-                        bat """
-                            pwd
-                        """
-                        bat """
-                            ls
-                        """
                     } catch (Exception e) {
                         echo "Error: ${e}"
                         currentBuild.result = 'FAILURE'
@@ -179,13 +173,17 @@ pipeline {
     }
     post {
         always {
-            publishHTML (target : [allowMissing: false,
-             alwaysLinkToLastBuild: true,
-             keepAll: true,
-             reportDir: 'reports',
-             reportFiles: 'myreport.html',
-             reportName: 'My Reports',
-             reportTitles: 'The Report'])
+            script {
+                if (!(env.BRANCH_NAME ==~ /feature\/.*/)) {
+                    publishHTML(target: [
+                        reportName: 'Trivy Report',
+                        reportDir: '.',
+                        reportFiles: 'trivy-report.html',
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true
+                    ])
+                }
+            }
             cleanWs(cleanWhenNotBuilt: false,
                                 deleteDirs: true,
                                 disableDeferredWipeout: true,
