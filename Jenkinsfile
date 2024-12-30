@@ -94,7 +94,7 @@ pipeline {
             echo "Git Branch Name: ${env.GIT_BRANCH_NAME}"
             echo "Build Number: ${env.BUILD_NUMBER}"
             echo "Pushing Docker image with tag: ${IMAGE_TAG}"
-            steps {
+            script {
                 try {
                     withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
                         bat 'docker login -u ducminh210503 -p %dockerhubpwd%'
