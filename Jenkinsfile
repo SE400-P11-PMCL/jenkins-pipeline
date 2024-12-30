@@ -60,6 +60,11 @@ pipeline {
             }
         }
         stage('SonarQube Analysis') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     bat """
@@ -72,6 +77,11 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     try {
@@ -87,12 +97,18 @@ pipeline {
             }
         }
         stage('Scan Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     try {
                         bat """
-                            trivy image --exit-code 0 --severity HIGH,CRITICAL --no-progress ${DOCKER_IMAGE}
+                            trivy image --severity HIGH,CRITICAL --no-progress --format table -o trivy-report.html ${DOCKER_IMAGE}
                         """
+                        echo "Trivy report generated at: ${env.WORKSPACE}\\trivy-report.html"
                     } catch (Exception e) {
                         echo "Error: ${e}"
                         currentBuild.result = 'FAILURE'
@@ -102,6 +118,11 @@ pipeline {
             }
         }
         stage('Push Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     env.IMAGE_TAG = "${env.GIT_BRANCH_NAME}-${env.BUILD_NUMBER}"
@@ -153,6 +174,13 @@ pipeline {
     }
     post {
         always {
+//             publishHTML (target : [allowMissing: false,
+//              alwaysLinkToLastBuild: true,
+//              keepAll: true,
+//              reportDir: 'reports',
+//              reportFiles: 'myreport.html',
+//              reportName: 'My Reports',
+//              reportTitles: 'The Report'])
             cleanWs(cleanWhenNotBuilt: false,
                                 deleteDirs: true,
                                 disableDeferredWipeout: true,
