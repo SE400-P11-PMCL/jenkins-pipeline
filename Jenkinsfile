@@ -106,7 +106,7 @@ pipeline {
                 script {
                     try {
                         bat """
-                            trivy image --exit-code 0 --severity HIGH,CRITICAL --no-progress ${DOCKER_IMAGE}
+                            trivy image --severity HIGH,CRITICAL --no-progress --format table -o trivy-report.html ${DOCKER_IMAGE}
                         """
                     } catch (Exception e) {
                         echo "Error: ${e}"
@@ -117,6 +117,11 @@ pipeline {
             }
         }
         stage('Push Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     env.IMAGE_TAG = "${env.GIT_BRANCH_NAME}-${env.BUILD_NUMBER}"
@@ -168,6 +173,17 @@ pipeline {
     }
     post {
         always {
+            script {
+                if (!(env.BRANCH_NAME ==~ /feature\/.*/)) {
+                    publishHTML(target: [
+                        reportName: 'Trivy Report',
+                        reportDir: '.',
+                        reportFiles: 'trivy-report.html',
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true
+                    ])
+                }
+            }
             cleanWs(cleanWhenNotBuilt: false,
                                 deleteDirs: true,
                                 disableDeferredWipeout: true,
