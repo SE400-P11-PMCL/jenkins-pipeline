@@ -19,7 +19,7 @@ class TestControllerTests {
     void homeEndpointReturnsHelloWorldMinh() throws Exception {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Hello World Minh"));
+                .andExpect(content().string("Hello World Minh dep trai!"));
     }
 
     @Test
