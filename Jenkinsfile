@@ -6,14 +6,14 @@ pipeline {
     }
     environment {
         SONAR_TOKEN = credentials('sonartoken')
-        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;D:\\helm-v3.16.3-windows-amd64\\windows-amd64;${env.PATH}"
+        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;
+                D:\\helm-v3.16.3-windows-amd64\\windows-amd64;D:\\trivy_0.58.1_windows-64bit;${env.PATH}"
         KUBECONFIG = "C:\\Users\\Admin\\.kube\\config"
         DOCKER_IMAGE = "cicd-se400"
         HELM_CHART = "D:\\Workspace\\Reference\\cicd\\deploy"
         KUBERNETES_NAMESPACE_DEV = "dev"
         KUBERNETES_NAMESPACE_STAGING = "staging"
         KUBERNETES_NAMESPACE_PROD = "prod"
-        TRIVY_HOME="D:\\trivy_0.58.1_windows-64bit"
     }
     tools {
         maven 'maven_tool'
