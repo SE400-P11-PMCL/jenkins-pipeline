@@ -90,26 +90,27 @@ pipeline {
             }
         }
         stage('Push Docker Image') {
-            env.IMAGE_TAG = "${env.GIT_BRANCH_NAME}-${env.BUILD_NUMBER}"
-            echo "Git Branch Name: ${env.GIT_BRANCH_NAME}"
-            echo "Build Number: ${env.BUILD_NUMBER}"
-            echo "Pushing Docker image with tag: ${IMAGE_TAG}"
-            script {
-                try {
-                    withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
-                        bat 'docker login -u ducminh210503 -p %dockerhubpwd%'
+            steps {
+                env.IMAGE_TAG = "${env.GIT_BRANCH_NAME}-${env.BUILD_NUMBER}"
+                echo "Git Branch Name: ${env.GIT_BRANCH_NAME}"
+                echo "Build Number: ${env.BUILD_NUMBER}"
+                echo "Pushing Docker image with tag: ${IMAGE_TAG}"
+                script {
+                    try {
+                        withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
+                            bat 'docker login -u ducminh210503 -p %dockerhubpwd%'
+                        }
+                        bat """docker tag ducminh210503/cicd-se400 ducminh210503/${DOCKER_IMAGE}:${IMAGE_TAG}"""
+                        bat """docker push ducminh210503/${DOCKER_IMAGE}:${IMAGE_TAG}"""
                     }
-                    bat """docker tag ducminh210503/cicd-se400 ducminh210503/${DOCKER_IMAGE}:${IMAGE_TAG}"""
-                    bat """docker push ducminh210503/${DOCKER_IMAGE}:${IMAGE_TAG}"""
-                }
-                catch (Exception e) {
-                    echo "Error: ${e}"
-                    currentBuild.result = 'FAILURE'
-                    error("Failed to push Docker image: ${e.message}")
+                    catch (Exception e) {
+                        echo "Error: ${e}"
+                        currentBuild.result = 'FAILURE'
+                        error("Failed to push Docker image: ${e.message}")
+                    }
                 }
             }
         }
-
         stage('Deploy to Kubernetes') {
             when {
                 branch pattern: '^(feature|develop|release|main)$'
