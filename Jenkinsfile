@@ -126,7 +126,6 @@ pipeline {
                         bat """
                             helm upgrade --install cicd-se400 ${HELM_CHART} ^
                                 --namespace ${namespace} ^
-                                --set image.repository=${DOCKER_REGISTRY}/${DOCKER_IMAGE} ^
                                 --set image.tag=${IMAGE_TAG}
                         """
                     } catch (Exception e) {
