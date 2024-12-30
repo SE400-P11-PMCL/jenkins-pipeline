@@ -9,6 +9,7 @@ pipeline {
         KUBERNETES_NAMESPACE_DEV = "dev"
         KUBERNETES_NAMESPACE_STAGING = "staging"
         KUBERNETES_NAMESPACE_PROD = "prod"
+        IMAGE_TAG = ""
     }
     tools {
         maven 'maven_tool'
