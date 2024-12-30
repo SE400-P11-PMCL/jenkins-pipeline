@@ -110,7 +110,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             when {
-                branch pattern: "^(feature|develop|release|main)$"
+                branch pattern: '^(feature|develop|release|main)$'
             }
             steps {
                 script {
