@@ -45,7 +45,7 @@ pipeline {
                         checkout scm
                     }
 
-                    env.GIT_BRANCH_NAME = env.BRANCH_NAME ?: sh(
+                    env.GIT_BRANCH_NAME = env.BRANCH_NAME ?: bat(
                         script: 'git rev-parse --abbrev-ref HEAD',
                         returnStdout: true
                     ).trim()
@@ -163,7 +163,7 @@ pipeline {
 def getKubernetesNamespace(branchName) {
     if (branchName.startsWith("feature")) {
         return KUBERNETES_NAMESPACE_DEV
-    } else if (branchName.startsWith("release")) {
+    } else if (branchName.startsWith("staging")) {
         return KUBERNETES_NAMESPACE_STAGING
     } else if (branchName == "main") {
         return KUBERNETES_NAMESPACE_PROD
