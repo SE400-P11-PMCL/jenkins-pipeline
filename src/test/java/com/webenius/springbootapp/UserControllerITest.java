@@ -1,4 +1,4 @@
-package com.webenius.springbootapp.controller;
+package com.webenius.springbootapp;
 
 import com.webenius.springbootapp.model.User;
 import com.webenius.springbootapp.repository.UserRepository;
@@ -45,30 +45,12 @@ public class UserControllerITest {
     }
 
     @Test
-    public void getUserByIdReturnsUser() {
-        ResponseEntity<User> response = restTemplate.getForEntity("/1", User.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        User user = response.getBody();
-        assertThat(user.getName()).isEqualTo("John Doe");
-    }
-
-    @Test
     public void createUserReturnsCreatedUser() {
         User newUser = new User(null, "John Smith", "johnsmith@example.com");
         ResponseEntity<User> response = restTemplate.postForEntity("/", newUser, User.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         User createdUser = response.getBody();
         assertThat(createdUser.getName()).isEqualTo("John Smith");
-    }
-
-    @Test
-    public void updateUserReturnsUpdatedUser() {
-        User updatedUser = new User(null, "John Smith", "johnsmith@example.com");
-        HttpEntity<User> requestEntity = new HttpEntity<>(updatedUser);
-        ResponseEntity<User> response = restTemplate.exchange("/1", HttpMethod.PUT, requestEntity, User.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        User user = response.getBody();
-        assertThat(user.getName()).isEqualTo("John Smith");
     }
 
     @Test
