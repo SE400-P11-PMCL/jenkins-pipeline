@@ -44,9 +44,9 @@ spec:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://postgres:5432/mydatabase
             - name: SPRING_DATASOURCE_USERNAME
-              value: user
+              value: {{ .Values.database.username }}
             - name: SPRING_DATASOURCE_PASSWORD
-              value: password
+              value: {{ .Values.database.password }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:

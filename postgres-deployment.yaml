@@ -19,9 +19,9 @@ spec:
             - name: POSTGRES_DB
               value: mydatabase
             - name: POSTGRES_PASSWORD
-              value: password
+              value: prod_password
             - name: POSTGRES_USER
-              value: user
+              value: prod_user
           ports:
             - containerPort: 5432
           volumeMounts:

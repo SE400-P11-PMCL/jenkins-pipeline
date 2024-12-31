@@ -165,6 +165,7 @@ pipeline {
                         bat """
                             helm upgrade --install ${DOCKER_IMAGE} ${HELM_CHART} ^
                                 --namespace ${namespace} ^
+                                --values ./deploy/values-${namespace}.yaml ^
                                 --set image.tag=${IMAGE_TAG}
                         """
                     } catch (Exception e) {
