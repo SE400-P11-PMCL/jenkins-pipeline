@@ -179,7 +179,7 @@ pipeline {
             }
         }
 
-        stage('Deploy to Staging Kubernetes') {
+        stage('Deploy to Production Kubernetes') {
                     when {
                         expression {
                             env.BRANCH_NAME ==~ /(staging)/
