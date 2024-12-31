@@ -1,0 +1,10 @@
+filebeat.inputs:
+  - type: log
+    paths:
+      - /app/logs/*.log  # Thư mục log của ứng dụng
+    fields:
+      service: cicd-se400
+    fields_under_root: true
+
+output.logstash:
+  hosts: ["logstash:5044"]  # Kết nối đến Logstash
