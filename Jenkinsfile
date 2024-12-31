@@ -60,9 +60,7 @@ pipeline {
             }
         }
         stage('Integration Test') {
-            when {
-                branch: 'staging'
-            }
+            when { anyOf { branch 'staging' } }
             steps {
                 bat 'mvn verify'
             }
