@@ -59,6 +59,7 @@ pipeline {
                 bat 'mvn test'
             }
         }
+
         stage('SonarQube Analysis') {
             when {
                 not {
@@ -146,7 +147,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             when {
                 expression {
-                    env.BRANCH_NAME ==~ /(feature|staging|main)/
+                    env.BRANCH_NAME ==~ /(develop|staging|main)/
                 }
             }
             steps {
