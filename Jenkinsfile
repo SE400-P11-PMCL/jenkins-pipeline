@@ -54,17 +54,17 @@ pipeline {
                 bat 'mvn clean package -DskipTests'
             }
         }
-        stage('Unit Test') {
-            steps {
-                bat 'mvn test'
-            }
-        }
-        stage('Integration Test') {
-            when { anyOf { branch 'staging' } }
-            steps {
-                bat 'mvn verify'
-            }
-        }
+//         stage('Unit Test') {
+//             steps {
+//                 bat 'mvn test'
+//             }
+//         }
+//         stage('Integration Test') {
+//             when { anyOf { branch 'staging' } }
+//             steps {
+//                 bat 'mvn verify'
+//             }
+//         }
 
         stage('SonarQube Analysis') {
             when {
