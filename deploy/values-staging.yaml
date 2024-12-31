@@ -14,6 +14,7 @@ image:
   tag: ""
 
 database:
+  url: jdbc:mysql://localhost:3306/mydatabase
   username: staging_user
   password: staging_password
 

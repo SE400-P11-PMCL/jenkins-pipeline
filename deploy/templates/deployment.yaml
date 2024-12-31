@@ -42,7 +42,7 @@ spec:
               protocol: TCP
           env:
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://postgres:5432/{{ .Values.database.name }}
+              value: {{ .Values.database.url }}
             - name: SPRING_DATASOURCE_USERNAME
               value: {{ .Values.database.username }}
             - name: SPRING_DATASOURCE_PASSWORD
