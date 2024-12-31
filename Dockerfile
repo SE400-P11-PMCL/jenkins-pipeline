@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y wget && \
     rm filebeat-7.17.3-amd64.deb
 COPY target/cicd-se400.jar cicd-se400.jar
 COPY filebeat.yml /etc/filebeat/filebeat.yml
-EXPOSE 8081
+EXPOSE 8080
 
 ENTRYPOINT ["sh", "-c", "filebeat -e & java -jar cicd-se400.jar"]
 
