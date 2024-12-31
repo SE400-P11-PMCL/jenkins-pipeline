@@ -171,11 +171,11 @@ pipeline {
                 }
             }
         }
-        stage('Deploy ELK Stack') {
-            steps {
-                sh 'docker-compose -f docker-compose.local.yml up -d'
-            }
-        }
+//         stage('Deploy ELK Stack') {
+//             steps {
+//                 sh 'docker-compose -f docker-compose.local.yml up -d'
+//             }
+//         }
     }
     post {
         always {
@@ -196,16 +196,16 @@ pipeline {
                                 notFailBuild: true,
                                 patterns: [[pattern: '.gitignore', type: 'INCLUDE'],
                                            [pattern: '.propsfile', type: 'EXCLUDE']])
-            emailext(
-                subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.result}",
-                body: """
-                Job: ${env.JOB_NAME} \n
-                Build Number: ${env.BUILD_NUMBER} \n
-                Build Status: ${currentBuild.result} \n
-                Build URL: ${env.BUILD_URL} \n
-                """,
-                to: "vuducminh210503@gmail.com"
-            )
+//             emailext(
+//                 subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.result}",
+//                 body: """
+//                 Job: ${env.JOB_NAME} \n
+//                 Build Number: ${env.BUILD_NUMBER} \n
+//                 Build Status: ${currentBuild.result} \n
+//                 Build URL: ${env.BUILD_URL} \n
+//                 """,
+//                 to: "vuducminh210503@gmail.com"
+//             )
         }
     }
 }
