@@ -17,11 +17,11 @@ spec:
           image: postgres:latest
           env:
             - name: POSTGRES_DB
-              value: mydatabase
+              value: develop
             - name: POSTGRES_PASSWORD
-              value: prod_password
+              value: dev_password
             - name: POSTGRES_USER
-              value: prod_user
+              value: dev_user
           ports:
             - containerPort: 5432
           volumeMounts:
