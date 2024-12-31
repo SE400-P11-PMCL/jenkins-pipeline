@@ -40,19 +40,6 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-          env:
-            - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://my-postgres-postgresql.default.svc.cluster.local:5432/orderdb"
-            - name: SPRING_DATASOURCE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: my-postgres
-                  key: postgresql-username
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: my-postgres
-                  key: postgresql-password
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
