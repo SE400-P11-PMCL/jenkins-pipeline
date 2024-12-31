@@ -175,7 +175,7 @@ pipeline {
 }
 
 def getKubernetesNamespace(branchName) {
-    if (branchName.startsWith("feature")) {
+    if (branchName.startsWith("develop")) {
         return KUBERNETES_NAMESPACE_DEV
     } else if (branchName.startsWith("staging")) {
         return KUBERNETES_NAMESPACE_STAGING
