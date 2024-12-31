@@ -14,7 +14,7 @@ image:
   tag: ""
 
 database:
-  url: jdbc:mysql://localhost:3306/mydatabase
+  url: jdbc:postgresql://localhost:5432/mydatabase
   username: staging_user
   password: staging_password
 
