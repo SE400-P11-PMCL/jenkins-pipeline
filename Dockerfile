@@ -9,3 +9,4 @@ COPY filebeat.yml /etc/filebeat/filebeat.yml
 EXPOSE 8081
 
 ENTRYPOINT ["sh", "-c", "filebeat -e & java -jar cicd-se400.jar"]
+

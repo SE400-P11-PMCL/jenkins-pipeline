@@ -1,8 +1,12 @@
 pipeline {
     agent any
+    parameters {
+        string(name: 'COMMIT_SHA', defaultValue: '', description: 'Commit SHA to checkout')
+        booleanParam(name: 'ROLLBACK_ON_FAILURE', defaultValue: true, description: 'Rollback on failure')
+    }
     environment {
         SONAR_TOKEN = credentials('sonartoken')
-        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;D:\\helm-v3.16.3-windows-amd64\\windows-amd64;${env.PATH}"
+        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;D:\\helm-v3.16.3-windows-amd64\\windows-amd64;D:\\trivy_0.58.1_windows-64bit;${env.PATH}"
         KUBECONFIG = "C:\\Users\\Admin\\.kube\\config"
         DOCKER_IMAGE = "cicd-se400"
         HELM_CHART = "D:\\Workspace\\Reference\\cicd\\deploy"
@@ -24,13 +28,6 @@ pipeline {
                 cleanWs()
             }
         }
-//         stage('Checkout Code') {
-//             steps {
-//                 checkout scmGit(branches: [[name: '*/main']],
-//                     extensions: [],
-//                     userRemoteConfigs: [[url: 'https://github.com/SE400-P11-PMCL/jenkins-pipeline.git']])
-//             }
-//         }
         stage('Checkout Code') {
             steps {
                 script {
@@ -62,7 +59,13 @@ pipeline {
                 bat 'mvn test'
             }
         }
+
         stage('SonarQube Analysis') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     bat """
@@ -75,6 +78,11 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     try {
@@ -89,7 +97,32 @@ pipeline {
                 }
             }
         }
+        stage('Scan Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
+            steps {
+                script {
+                    try {
+                        bat """
+                            trivy image --severity HIGH,CRITICAL --no-progress --format table -o trivy-report.html ${DOCKER_IMAGE}
+                        """
+                    } catch (Exception e) {
+                        echo "Error: ${e}"
+                        currentBuild.result = 'FAILURE'
+                        error("Failed to scan Docker image: ${e.message}")
+                    }
+                }
+            }
+        }
         stage('Push Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     env.IMAGE_TAG = "${env.GIT_BRANCH_NAME}-${env.BUILD_NUMBER}"
@@ -114,7 +147,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             when {
                 expression {
-                    env.BRANCH_NAME ==~ /(feature|develop|release|main)/
+                    env.BRANCH_NAME ==~ /(develop|staging|main)/
                 }
             }
             steps {
@@ -124,7 +157,7 @@ pipeline {
 
                     try {
                         bat """
-                            helm upgrade --install cicd-se400 ${HELM_CHART} ^
+                            helm upgrade --install ${DOCKER_IMAGE} ${HELM_CHART} ^
                                 --namespace ${namespace} ^
                                 --set image.tag=${IMAGE_TAG}
                         """
@@ -146,6 +179,17 @@ pipeline {
     }
     post {
         always {
+            script {
+                if (!(env.BRANCH_NAME ==~ /feature\/.*/)) {
+                    publishHTML(target: [
+                        reportName: 'Trivy Report',
+                        reportDir: '.',
+                        reportFiles: 'trivy-report.html',
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true
+                    ])
+                }
+            }
             cleanWs(cleanWhenNotBuilt: false,
                                 deleteDirs: true,
                                 disableDeferredWipeout: true,
@@ -167,7 +211,7 @@ pipeline {
 }
 
 def getKubernetesNamespace(branchName) {
-    if (branchName.startsWith("feature")) {
+    if (branchName.startsWith("develop")) {
         return KUBERNETES_NAMESPACE_DEV
     } else if (branchName.startsWith("staging")) {
         return KUBERNETES_NAMESPACE_STAGING
