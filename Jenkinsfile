@@ -59,6 +59,14 @@ pipeline {
                 bat 'mvn test'
             }
         }
+        stage('Integration Test') {
+            when {
+                branch: 'staging'
+            }
+            steps {
+                bat 'mvn verify'
+            }
+        }
 
         stage('SonarQube Analysis') {
             when {
