@@ -1,11 +1,12 @@
-package org.minh;
+package com.ivanfranchin.orderapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class CicdApplication {
+public class OrderApiApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(CicdApplication.class, args);
+        SpringApplication.run(OrderApiApplication.class, args);
     }
 }

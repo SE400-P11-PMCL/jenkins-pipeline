@@ -6,14 +6,13 @@ pipeline {
     }
     environment {
         SONAR_TOKEN = credentials('sonartoken')
-        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;D:\\helm-v3.16.3-windows-amd64\\windows-amd64;${env.PATH}"
+        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;D:\\helm-v3.16.3-windows-amd64\\windows-amd64;D:\\trivy_0.58.1_windows-64bit;${env.PATH}"
         KUBECONFIG = "C:\\Users\\Admin\\.kube\\config"
         DOCKER_IMAGE = "cicd-se400"
         HELM_CHART = "D:\\Workspace\\Reference\\cicd\\deploy"
         KUBERNETES_NAMESPACE_DEV = "dev"
         KUBERNETES_NAMESPACE_STAGING = "staging"
         KUBERNETES_NAMESPACE_PROD = "prod"
-        TRIVY_HOME="D:\\trivy_0.58.1_windows-64bit"
     }
     tools {
         maven 'maven_tool'
@@ -60,7 +59,13 @@ pipeline {
                 bat 'mvn test'
             }
         }
+
         stage('SonarQube Analysis') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     bat """
@@ -73,6 +78,11 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     try {
@@ -88,11 +98,16 @@ pipeline {
             }
         }
         stage('Scan Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     try {
                         bat """
-                            trivy image --exit-code 0 --severity HIGH,CRITICAL --no-progress ${DOCKER_IMAGE}
+                            trivy image --severity HIGH,CRITICAL --no-progress --format table -o trivy-report.html ${DOCKER_IMAGE}
                         """
                     } catch (Exception e) {
                         echo "Error: ${e}"
@@ -103,6 +118,11 @@ pipeline {
             }
         }
         stage('Push Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     env.IMAGE_TAG = "${env.GIT_BRANCH_NAME}-${env.BUILD_NUMBER}"
@@ -127,7 +147,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             when {
                 expression {
-                    env.BRANCH_NAME ==~ /(feature|staging|main)/
+                    env.BRANCH_NAME ==~ /(develop|staging|main)/
                 }
             }
             steps {
@@ -154,6 +174,17 @@ pipeline {
     }
     post {
         always {
+            script {
+                if (!(env.BRANCH_NAME ==~ /feature\/.*/)) {
+                    publishHTML(target: [
+                        reportName: 'Trivy Report',
+                        reportDir: '.',
+                        reportFiles: 'trivy-report.html',
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true
+                    ])
+                }
+            }
             cleanWs(cleanWhenNotBuilt: false,
                                 deleteDirs: true,
                                 disableDeferredWipeout: true,
