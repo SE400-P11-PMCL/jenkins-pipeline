@@ -193,6 +193,7 @@ pipeline {
                             try {
                                 bat """
                                     helm upgrade --install ${DOCKER_IMAGE} ${HELM_CHART} ^
+                                        --namespace prod ^
                                         --values ./deploy/values-prod.yaml ^
                                         --set image.tag=${IMAGE_TAG}
                                 """

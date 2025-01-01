@@ -14,9 +14,9 @@ image:
   tag: ""
 
 database:
-  url: jdbc:postgresql://localhost:5432/prod
-  username: staging_user
-  password: staging_password
+  url: jdbc:postgresql://localhost:5432/mydatabase
+  username: prod_user
+  password: prod_password
 
 # This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
