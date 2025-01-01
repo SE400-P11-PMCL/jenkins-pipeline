@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
         - name: spring-boot-app
-          image: ducminh210503/user-cicd:latest
-          imagePullPolicy: IfNotPresent
+          image: ducminh210503/cicd-se400:develop-31
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
