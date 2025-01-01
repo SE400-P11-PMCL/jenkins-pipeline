@@ -183,7 +183,14 @@ pipeline {
                 }
             }
         }
-
+        stage('Deploy for production') {
+            when {
+                branch 'staging'
+            }
+            steps {
+                input message: 'Finished testing the web site? (Click "Proceed" to continue)'
+            }
+        }
         stage('Deploy to Production Kubernetes') {
             when {
                 expression {
