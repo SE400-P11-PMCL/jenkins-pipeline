@@ -14,7 +14,7 @@ image:
   tag: ""
 
 database:
-  url: jdbc:postgresql://localhost:5432/mydatabase
+  url: jdbc:postgresql://postgres:5432/mydatabase
   username: prod_user
   password: prod_password
 
