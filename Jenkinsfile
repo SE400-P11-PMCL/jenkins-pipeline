@@ -164,13 +164,14 @@ pipeline {
                     try {
                         bat """
                             helm upgrade --install ${DOCKER_IMAGE} ${HELM_CHART} ^
+                                --namespace staging ^
                                 --values ./deploy/values-staging.yaml ^
                                 --set image.tag=${IMAGE_TAG}
                         """
                     } catch (Exception e) {
                         if (params.ROLLBACK_ON_FAILURE) {
                             echo "Deployment failed, rolling back..."
-                            bat "helm rollback your-app --namespace ${namespace}"
+                            bat "helm rollback cicd-se400 --namespace ${namespace}"
                         }
                         error("Deployment to ${namespace} failed: ${e.message}")
                     }
