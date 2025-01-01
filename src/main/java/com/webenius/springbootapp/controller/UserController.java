@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping()
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
@@ -37,11 +37,6 @@ public class UserController {
         user.setName(userDetails.getName());
         user.setEmail(userDetails.getEmail());
         return userRepository.save(user);
-    }
-
-    @GetMapping("/test")
-    public String test() {
-        return "Hello World!";
     }
 
     @DeleteMapping("/{id}")
