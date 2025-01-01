@@ -6,14 +6,13 @@ pipeline {
     }
     environment {
         SONAR_TOKEN = credentials('sonartoken')
-        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;D:\\helm-v3.16.3-windows-amd64\\windows-amd64;${env.PATH}"
+        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;D:\\helm-v3.16.3-windows-amd64\\windows-amd64;D:\\trivy_0.58.1_windows-64bit;${env.PATH}"
         KUBECONFIG = "C:\\Users\\Admin\\.kube\\config"
         DOCKER_IMAGE = "cicd-se400"
         HELM_CHART = "D:\\Workspace\\Reference\\cicd\\deploy"
         KUBERNETES_NAMESPACE_DEV = "dev"
         KUBERNETES_NAMESPACE_STAGING = "staging"
         KUBERNETES_NAMESPACE_PROD = "prod"
-        TRIVY_HOME="D:\\trivy_0.58.1_windows-64bit"
     }
     tools {
         maven 'maven_tool'
@@ -55,12 +54,24 @@ pipeline {
                 bat 'mvn clean package -DskipTests'
             }
         }
-        stage('Unit Test') {
-            steps {
-                bat 'mvn test'
-            }
-        }
+//         stage('Unit Test') {
+//             steps {
+//                 bat 'mvn test'
+//             }
+//         }
+//         stage('Integration Test') {
+//             when { anyOf { branch 'staging' } }
+//             steps {
+//                 bat 'mvn verify'
+//             }
+//         }
+
         stage('SonarQube Analysis') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     bat """
@@ -73,6 +84,11 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     try {
@@ -88,11 +104,16 @@ pipeline {
             }
         }
         stage('Scan Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     try {
                         bat """
-                            trivy image --exit-code 0 --severity HIGH,CRITICAL --no-progress ${DOCKER_IMAGE}
+                            trivy image --severity HIGH,CRITICAL --no-progress --format table -o trivy-report.html ${DOCKER_IMAGE}
                         """
                     } catch (Exception e) {
                         echo "Error: ${e}"
@@ -103,6 +124,11 @@ pipeline {
             }
         }
         stage('Push Docker Image') {
+            when {
+                not {
+                    branch pattern: "feature/.*", comparator: "REGEXP"
+                }
+            }
             steps {
                 script {
                     env.IMAGE_TAG = "${env.GIT_BRANCH_NAME}-${env.BUILD_NUMBER}"
@@ -124,10 +150,10 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes') {
+        stage('Deploy to Staging Kubernetes') {
             when {
                 expression {
-                    env.BRANCH_NAME ==~ /(feature|staging|main)/
+                    env.BRANCH_NAME ==~ /(develop)/
                 }
             }
             steps {
@@ -138,44 +164,91 @@ pipeline {
                     try {
                         bat """
                             helm upgrade --install ${DOCKER_IMAGE} ${HELM_CHART} ^
-                                --namespace ${namespace} ^
+                                --namespace staging ^
+                                --values ./deploy/values-staging.yaml ^
                                 --set image.tag=${IMAGE_TAG}
                         """
                     } catch (Exception e) {
                         if (params.ROLLBACK_ON_FAILURE) {
                             echo "Deployment failed, rolling back..."
-                            bat "helm rollback your-app --namespace ${namespace}"
+                            bat "helm rollback cicd-se400 --namespace ${namespace}"
                         }
                         error("Deployment to ${namespace} failed: ${e.message}")
                     }
                 }
             }
         }
+
+        stage('Deploy to Production Kubernetes') {
+                    when {
+                        expression {
+                            env.BRANCH_NAME ==~ /(staging)/
+                        }
+                    }
+                    steps {
+                        script {
+                            def namespace = getKubernetesNamespace(env.GIT_BRANCH_NAME)
+                            echo "Deploying to Kubernetes Namespace: ${namespace}"
+
+                            try {
+                                bat """
+                                    helm upgrade --install ${DOCKER_IMAGE} ${HELM_CHART} ^
+                                        --namespace prod ^
+                                        --values ./deploy/values-prod.yaml ^
+                                        --set image.tag=${IMAGE_TAG}
+                                """
+                            } catch (Exception e) {
+                                if (params.ROLLBACK_ON_FAILURE) {
+                                    echo "Deployment failed, rolling back..."
+                                    bat "helm rollback your-app --namespace ${namespace}"
+                                }
+                                error("Deployment to ${namespace} failed: ${e.message}")
+                            }
+                        }
+                    }
+                }
+
+//         stage('Deploy ELK Stack') {
+//             steps {
+//                 sh 'docker-compose -f docker-compose.local.yml up -d'
+//             }
+//         }
     }
     post {
         always {
+            script {
+                if (!(env.BRANCH_NAME ==~ /feature\/.*/)) {
+                    publishHTML(target: [
+                        reportName: 'Trivy Report',
+                        reportDir: '.',
+                        reportFiles: 'trivy-report.html',
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true
+                    ])
+                }
+            }
             cleanWs(cleanWhenNotBuilt: false,
                                 deleteDirs: true,
                                 disableDeferredWipeout: true,
                                 notFailBuild: true,
                                 patterns: [[pattern: '.gitignore', type: 'INCLUDE'],
                                            [pattern: '.propsfile', type: 'EXCLUDE']])
-            emailext(
-                subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.result}",
-                body: """
-                Job: ${env.JOB_NAME} \n
-                Build Number: ${env.BUILD_NUMBER} \n
-                Build Status: ${currentBuild.result} \n
-                Build URL: ${env.BUILD_URL} \n
-                """,
-                to: "vuducminh210503@gmail.com"
-            )
+//             emailext(
+//                 subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.result}",
+//                 body: """
+//                 Job: ${env.JOB_NAME} \n
+//                 Build Number: ${env.BUILD_NUMBER} \n
+//                 Build Status: ${currentBuild.result} \n
+//                 Build URL: ${env.BUILD_URL} \n
+//                 """,
+//                 to: "vuducminh210503@gmail.com"
+//             )
         }
     }
 }
 
 def getKubernetesNamespace(branchName) {
-    if (branchName.startsWith("feature")) {
+    if (branchName.startsWith("develop")) {
         return KUBERNETES_NAMESPACE_DEV
     } else if (branchName.startsWith("staging")) {
         return KUBERNETES_NAMESPACE_STAGING

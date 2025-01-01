@@ -13,6 +13,11 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+database:
+  url: jdbc:postgresql://localhost:5432/mydatabase
+  username: prod_user
+  password: prod_password
+
 # This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
 # This is to override the chart name.
