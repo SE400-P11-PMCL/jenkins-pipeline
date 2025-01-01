@@ -67,7 +67,7 @@ pipeline {
             }
         }
         stage('Performance Test') {
-//             when { anyOf { branch 'staging' } }
+            when { anyOf { branch 'staging' } }
             steps {
                 bat 'jmeter -n -t HTTPRequest.jmx'
             }
