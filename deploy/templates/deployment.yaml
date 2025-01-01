@@ -47,10 +47,10 @@ spec:
               value: {{ .Values.database.username }}
             - name: SPRING_DATASOURCE_PASSWORD
               value: {{ .Values.database.password }}
-          livenessProbe:
-            {{- toYaml .Values.livenessProbe | nindent 12 }}
-          readinessProbe:
-            {{- toYaml .Values.readinessProbe | nindent 12 }}
+{{/*          livenessProbe:*/}}
+{{/*            {{- toYaml .Values.livenessProbe | nindent 12 }}*/}}
+{{/*          readinessProbe:*/}}
+{{/*            {{- toYaml .Values.readinessProbe | nindent 12 }}*/}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- with .Values.volumeMounts }}
