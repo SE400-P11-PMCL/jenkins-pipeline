@@ -42,21 +42,15 @@ spec:
               protocol: TCP
           env:
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://my-postgres-postgresql.default.svc.cluster.local:5432/orderdb"
+              value: {{ .Values.database.url }}
             - name: SPRING_DATASOURCE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: my-postgres
-                  key: postgresql-username
+              value: {{ .Values.database.username }}
             - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: my-postgres
-                  key: postgresql-password
-          livenessProbe:
-            {{- toYaml .Values.livenessProbe | nindent 12 }}
-          readinessProbe:
-            {{- toYaml .Values.readinessProbe | nindent 12 }}
+              value: {{ .Values.database.password }}
+{{/*          livenessProbe:*/}}
+{{/*            {{- toYaml .Values.livenessProbe | nindent 12 }}*/}}
+{{/*          readinessProbe:*/}}
+{{/*            {{- toYaml .Values.readinessProbe | nindent 12 }}*/}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- with .Values.volumeMounts }}

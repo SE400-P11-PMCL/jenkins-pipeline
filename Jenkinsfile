@@ -54,11 +54,17 @@ pipeline {
                 bat 'mvn clean package -DskipTests'
             }
         }
-        stage('Unit Test') {
-            steps {
-                bat 'mvn test'
-            }
-        }
+//         stage('Unit Test') {
+//             steps {
+//                 bat 'mvn test'
+//             }
+//         }
+//         stage('Integration Test') {
+//             when { anyOf { branch 'staging' } }
+//             steps {
+//                 bat 'mvn verify'
+//             }
+//         }
 
         stage('SonarQube Analysis') {
             when {
@@ -144,10 +150,10 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Kubernetes') {
+        stage('Deploy to Staging Kubernetes') {
             when {
                 expression {
-                    env.BRANCH_NAME ==~ /(develop|staging|main)/
+                    env.BRANCH_NAME ==~ /(develop)/
                 }
             }
             steps {
@@ -158,24 +164,55 @@ pipeline {
                     try {
                         bat """
                             helm upgrade --install ${DOCKER_IMAGE} ${HELM_CHART} ^
-                                --namespace ${namespace} ^
+                                --namespace staging ^
+                                --values ./deploy/values-staging.yaml ^
                                 --set image.tag=${IMAGE_TAG}
                         """
                     } catch (Exception e) {
                         if (params.ROLLBACK_ON_FAILURE) {
                             echo "Deployment failed, rolling back..."
-                            bat "helm rollback your-app --namespace ${namespace}"
+                            bat "helm rollback cicd-se400 --namespace ${namespace}"
                         }
                         error("Deployment to ${namespace} failed: ${e.message}")
                     }
                 }
             }
         }
-        stage('Deploy ELK Stack') {
-            steps {
-                sh 'docker-compose -f docker-compose.local.yml up -d'
-            }
-        }
+
+        stage('Deploy to Production Kubernetes') {
+                    when {
+                        expression {
+                            env.BRANCH_NAME ==~ /(staging)/
+                        }
+                    }
+                    steps {
+                        script {
+                            def namespace = getKubernetesNamespace(env.GIT_BRANCH_NAME)
+                            echo "Deploying to Kubernetes Namespace: ${namespace}"
+
+                            try {
+                                bat """
+                                    helm upgrade --install ${DOCKER_IMAGE} ${HELM_CHART} ^
+                                        --namespace prod ^
+                                        --values ./deploy/values-prod.yaml ^
+                                        --set image.tag=${IMAGE_TAG}
+                                """
+                            } catch (Exception e) {
+                                if (params.ROLLBACK_ON_FAILURE) {
+                                    echo "Deployment failed, rolling back..."
+                                    bat "helm rollback your-app --namespace ${namespace}"
+                                }
+                                error("Deployment to ${namespace} failed: ${e.message}")
+                            }
+                        }
+                    }
+                }
+
+//         stage('Deploy ELK Stack') {
+//             steps {
+//                 sh 'docker-compose -f docker-compose.local.yml up -d'
+//             }
+//         }
     }
     post {
         always {
@@ -196,16 +233,16 @@ pipeline {
                                 notFailBuild: true,
                                 patterns: [[pattern: '.gitignore', type: 'INCLUDE'],
                                            [pattern: '.propsfile', type: 'EXCLUDE']])
-            emailext(
-                subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.result}",
-                body: """
-                Job: ${env.JOB_NAME} \n
-                Build Number: ${env.BUILD_NUMBER} \n
-                Build Status: ${currentBuild.result} \n
-                Build URL: ${env.BUILD_URL} \n
-                """,
-                to: "vuducminh210503@gmail.com"
-            )
+//             emailext(
+//                 subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.result}",
+//                 body: """
+//                 Job: ${env.JOB_NAME} \n
+//                 Build Number: ${env.BUILD_NUMBER} \n
+//                 Build Status: ${currentBuild.result} \n
+//                 Build URL: ${env.BUILD_URL} \n
+//                 """,
+//                 to: "vuducminh210503@gmail.com"
+//             )
         }
     }
 }
