@@ -164,7 +164,6 @@ pipeline {
                     try {
                         bat """
                             helm upgrade --install ${DOCKER_IMAGE} ${HELM_CHART} ^
-                                --namespace staging ^
                                 --values ./deploy/values-staging.yaml ^
                                 --set image.tag=${IMAGE_TAG}
                         """
