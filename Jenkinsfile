@@ -6,8 +6,9 @@ pipeline {
     }
     environment {
         SONAR_TOKEN = credentials('sonartoken')
-        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Java\\jdk-19;C:\\Program Files\\Docker\\Docker\\resources\\bin;D:\\helm-v3.16.3-windows-amd64\\windows-amd64;D:\\trivy_0.58.1_windows-64bit;D:\\apache-jmeter-5.6.3\\apache-jmeter-5.6.3\\bin;${env.PATH}"
+        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Java\\jdk-19\\bin;C:\\Program Files\\Docker\\Docker\\resources\\bin;D:\\helm-v3.16.3-windows-amd64\\windows-amd64;D:\\trivy_0.58.1_windows-64bit;D:\\apache-jmeter-5.6.3\\apache-jmeter-5.6.3\\bin;${env.PATH}"
         KUBECONFIG = "C:\\Users\\Admin\\.kube\\config"
+        JAVA_HOME = "C:\\Program Files\\Java\\jdk-19"
         DOCKER_IMAGE = "cicd-se400"
         HELM_CHART = "D:\\Workspace\\Reference\\cicd\\deploy"
         KUBERNETES_NAMESPACE_DEV = "dev"
@@ -66,7 +67,7 @@ pipeline {
             }
         }
         stage('Performance Test') {
-            when { anyOf { branch 'staging' } }
+//             when { anyOf { branch 'staging' } }
             steps {
                 bat 'jmeter -n -t HTTPRequest.jmx'
             }
