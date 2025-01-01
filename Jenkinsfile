@@ -6,7 +6,7 @@ pipeline {
     }
     environment {
         SONAR_TOKEN = credentials('sonartoken')
-        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;D:\\helm-v3.16.3-windows-amd64\\windows-amd64;D:\\trivy_0.58.1_windows-64bit;${env.PATH}"
+        PATH = "C:\\WINDOWS\\SYSTEM32;C:\\Program Files\\Docker\\Docker\\resources\\bin;D:\\helm-v3.16.3-windows-amd64\\windows-amd64;D:\\trivy_0.58.1_windows-64bit;D:\\apache-jmeter-5.6.3\\apache-jmeter-5.6.3\\bin;${env.PATH}"
         KUBECONFIG = "C:\\Users\\Admin\\.kube\\config"
         DOCKER_IMAGE = "cicd-se400"
         HELM_CHART = "D:\\Workspace\\Reference\\cicd\\deploy"
@@ -54,18 +54,23 @@ pipeline {
                 bat 'mvn clean package -DskipTests'
             }
         }
-//         stage('Unit Test') {
-//             steps {
-//                 bat 'mvn test'
-//             }
-//         }
-//         stage('Integration Test') {
-//             when { anyOf { branch 'staging' } }
-//             steps {
-//                 bat 'mvn verify'
-//             }
-//         }
-
+        stage('Unit Test') {
+            steps {
+                bat 'mvn test '
+            }
+        }
+        stage('Integration Test') {
+            when { anyOf { branch 'staging' } }
+            steps {
+                bat 'mvn verify'
+            }
+        }
+        stage('Performance Test') {
+            when { anyOf { branch 'staging' } }
+            steps {
+                bat 'jmeter -n -t HTTPRequest.jmx'
+            }
+        }
         stage('SonarQube Analysis') {
             when {
                 not {
@@ -180,33 +185,33 @@ pipeline {
         }
 
         stage('Deploy to Production Kubernetes') {
-                    when {
-                        expression {
-                            env.BRANCH_NAME ==~ /(staging)/
-                        }
-                    }
-                    steps {
-                        script {
-                            def namespace = getKubernetesNamespace(env.GIT_BRANCH_NAME)
-                            echo "Deploying to Kubernetes Namespace: ${namespace}"
+            when {
+                expression {
+                    env.BRANCH_NAME ==~ /(staging)/
+                }
+            }
+            steps {
+                script {
+                    def namespace = getKubernetesNamespace(env.GIT_BRANCH_NAME)
+                    echo "Deploying to Kubernetes Namespace: ${namespace}"
 
-                            try {
-                                bat """
-                                    helm upgrade --install ${DOCKER_IMAGE} ${HELM_CHART} ^
-                                        --namespace prod ^
-                                        --values ./deploy/values-prod.yaml ^
-                                        --set image.tag=${IMAGE_TAG}
-                                """
-                            } catch (Exception e) {
-                                if (params.ROLLBACK_ON_FAILURE) {
-                                    echo "Deployment failed, rolling back..."
-                                    bat "helm rollback your-app --namespace ${namespace}"
-                                }
-                                error("Deployment to ${namespace} failed: ${e.message}")
-                            }
+                    try {
+                        bat """
+                            helm upgrade --install ${DOCKER_IMAGE} ${HELM_CHART} ^
+                                --namespace prod ^
+                                --values ./deploy/values-prod.yaml ^
+                                --set image.tag=${IMAGE_TAG}
+                        """
+                    } catch (Exception e) {
+                        if (params.ROLLBACK_ON_FAILURE) {
+                            echo "Deployment failed, rolling back..."
+                            bat "helm rollback your-app --namespace ${namespace}"
                         }
+                        error("Deployment to ${namespace} failed: ${e.message}")
                     }
                 }
+            }
+        }
 
 //         stage('Deploy ELK Stack') {
 //             steps {
@@ -233,16 +238,16 @@ pipeline {
                                 notFailBuild: true,
                                 patterns: [[pattern: '.gitignore', type: 'INCLUDE'],
                                            [pattern: '.propsfile', type: 'EXCLUDE']])
-//             emailext(
-//                 subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.result}",
-//                 body: """
-//                 Job: ${env.JOB_NAME} \n
-//                 Build Number: ${env.BUILD_NUMBER} \n
-//                 Build Status: ${currentBuild.result} \n
-//                 Build URL: ${env.BUILD_URL} \n
-//                 """,
-//                 to: "vuducminh210503@gmail.com"
-//             )
+            emailext(
+                subject: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${currentBuild.result}",
+                body: """
+                Job: ${env.JOB_NAME} \n
+                Build Number: ${env.BUILD_NUMBER} \n
+                Build Status: ${currentBuild.result} \n
+                Build URL: ${env.BUILD_URL} \n
+                """,
+                to: "vuducminh210503@gmail.com"
+            )
         }
     }
 }
