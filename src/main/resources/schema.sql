@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS users; -- don't do this on a production environment
+DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -8,7 +8,7 @@ CREATE TABLE users (
 
 INSERT INTO users
     (id, name, email)
-VALUES (1,'John Doe','john@example.com');
+VALUES (100,'John Doe','john@example.com');
 INSERT INTO users
     (id, name, email)
-VALUES (2,'Jane Smith','jane@example.com');
+VALUES (200,'Jane Smith','jane@example.com');
