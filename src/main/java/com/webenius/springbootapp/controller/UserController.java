@@ -40,9 +40,9 @@ public class UserController {
         return userRepository.save(user);
     }
 
-    @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable Long id) {
-        userRepository.deleteById(id);
-        return "User deleted with id " + id;
-    }
+//    @DeleteMapping("/{id}")
+//    public String deleteUser(@PathVariable Long id) {
+//        userRepository.deleteById(id);
+//        return "User deleted with id " + id;
+//    }
 }
