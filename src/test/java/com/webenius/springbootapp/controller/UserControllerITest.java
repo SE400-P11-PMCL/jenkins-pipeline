@@ -108,15 +108,15 @@ class UserControllerITest {
         verify(userRepository, times(1)).save(any());
     }
 
-//    @Test
-//    void testDeleteUser() throws Exception {
-//        doNothing().when(userRepository).deleteById(1L);
-//
-//        mockMvc.perform(delete("/1")
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(content().string("User deleted with id 1"));
-//
-//        verify(userRepository, times(1)).deleteById(1L);
-//    }
+    @Test
+    void testDeleteUser() throws Exception {
+        doNothing().when(userRepository).deleteById(1L);
+
+        mockMvc.perform(delete("/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("User deleted with id 1"));
+
+        verify(userRepository, times(1)).deleteById(1L);
+    }
 }
