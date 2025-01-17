@@ -1,56 +1,109 @@
-# Basic Jenkins pipeline.
+# Jenkins CI/CD Pipeline
 
-This guide will help you set up Jenkins to automate the process of pulling a Git repository, building a Docker image, and pushing it to a Docker registry. In this example, we'll be using a Jenkins pipeline to achieve this workflow
+## Overview
+This repository contains a robust CI/CD pipeline implemented using Jenkins, integrated with modern DevOps tools and best practices. The pipeline is designed to support multi-environment deployments leveraging Git Flow and provides quality assurance through static code analysis, container security scanning, load testing, and more.
+
+## Key Features
+- **Version Control**: Git with Git Flow branching strategy for streamlined development and release processes.
+- **Build Automation**: Maven for compiling, testing, and packaging Java applications.
+- **Containerization**: Docker for creating lightweight, portable, and consistent containers.
+- **Security Scanning**: Trivy for container image vulnerability scanning.
+- **Performance Testing**: JMeter for load and performance testing.
+- **Code Quality**: SonarQube for static code analysis and ensuring code quality standards.
+- **Orchestration**: Helm for managing Kubernetes deployments.
+- **Local Kubernetes Environment**: Minikube for testing and validating deployments in a local Kubernetes cluster.
+
+## Tools and Technologies
+- **Source Code Management**: Git (Git Flow)
+- **CI/CD Orchestration**: Jenkins
+- **Build Tool**: Maven
+- **Containerization**: Docker
+- **Container Security**: Trivy
+- **Load Testing**: JMeter
+- **Static Code Analysis**: SonarQube
+- **Kubernetes Deployment**: Helm
+- **Local Kubernetes**: Minikube
+
+---
 
 ## Prerequisites
+Ensure the following are installed and configured on your system:
+- **Jenkins** with necessary plugins:
+  - Git Plugin
+  - Docker Plugin
+  - Kubernetes Plugin
+  - SonarQube Scanner Plugin
+  - Pipeline Plugin
+- **Docker**
+- **Trivy**
+- **Apache JMeter**
+- **SonarQube Server**
+- **Helm**
+- **Minikube**
+- **Maven**
 
-- Docker and Docker Compose are installed on your system
-- You have a GitHub repository that contains the code and Dockerfile for your application
-- You have a Docker Hub account for pushing Docker images
+---
 
-## Steps
+## Pipeline Workflow
 
-1. **Update Jenkinsfile**:
-   Open the `Jenkinsfile` in your repository and change the Docker registry username and update the image tag according to your naming convention
+### 1. Branching Strategy
+- **Git Flow**:
+  - `main`: Production-ready code.
+  - `develop`: Integration branch for feature development.
+  - `feature/*`: Feature-specific branches.
+  - `release/*`: Release preparation branches.
+  - `hotfix/*`: Quick patches for production.
 
-2. **Run Jenkins**:
-   Start Jenkins using the following command:
+### 2. Pipeline Stages
+#### a. **Code Checkout**
+- Clone the repository from GitHub.
+- Switch to the appropriate branch based on the Git Flow model.
+
+#### b. **Build and Unit Testing**
+- Use Maven to compile the code and run unit tests.
+- Generate build artifacts (e.g., JAR files).
+
+#### c. **Static Code Analysis**
+- Run SonarQube to analyze code quality and report vulnerabilities.
+
+#### d. **Containerization**
+- Build Docker images for the application.
+- Tag the images using the branch name and version.
+
+#### e. **Security Scanning**
+- Scan Docker images for vulnerabilities using Trivy.
+
+#### f. **Load Testing**
+- Execute JMeter scripts to test the application’s performance under load.
+
+#### g. **Kubernetes Deployment**
+- Deploy the application to a local Kubernetes cluster using Helm and Minikube.
+- Test the deployment in multiple environments (e.g., dev, staging, prod).
+
+### 3. Multi-Environment Deployment
+- Utilize Git Flow branches to deploy to different environments:
+  - `develop` -> Development environment.
+  - `staging` -> Staging environment.
+  - `main` -> Production environment.
+
+## Local Setup and Testing
+1. Start Minikube:
    ```bash
-   docker-compose -f docker-compose.jenkins.yml up
+   minikube start
    ```
-This will start the Jenkins server
 
-3. **Access Jenkins**:
-   Open your web browser and navigate to `http://localhost:8080` to access the Jenkins web interface
+2. Deploy SonarQube locally:
+   ```bash
+   helm install sonarqube sonarqube/sonarqube
+   ```
 
-4. **Login to Jenkins**:
-   You'll need the initial admin password to log in. You can find this password in the console where you started Jenkins or at `/var/jenkins_home/secrets/initialAdminPassword`. Follow the prompts to set up Jenkins
+3. Test the pipeline locally using:
+   ```bash
+   jenkins-cli build <job-name>
+   ```
 
-5. **Install Plugins**:
-   Choose the 'Install suggested plugins' option during the initial setup. This will install the necessary plugins for your Jenkins instance
+---
 
-6. **Configure Pipeline**:
-    - From the main dashboard, create a new pipeline item
-    - In the 'GitHub project' field, enter the URL of your GitHub repository.
-    - Choose 'GitHub hook trigger for GITScm polling' in the build triggers section.
-    - Select 'Pipeline script from SCM' in the pipeline section.
-    - Choose 'Git' for SCM and enter your repository URL.
-    - Authorize Jenkins to access your GitHub repository.
-    - Set '*/master' as the branch to build.
-    - Save the configuration.
+## Support
+For any issues or questions, please raise an issue in this repository.
 
-7. **Create Docker Credentials**:
-    - Create a new credential with the following configurations:
-        - Kind: Secret text
-        - Scope: Global
-        - Secret: (Insert your Docker Hub password here)
-        - ID: dockerhub-pwd
-
-8. **Configure Tools**:
-    - Navigate to 'Manage Jenkins' > 'Global Tool Configuration'
-    - Add Maven in the Maven installation section with the name 'maven_tool'.
-    - Similarly, add Docker in the Docker installation section.
-
-9. **Build Pipeline**:
-    - Go back to the main dashboard and open the pipeline you created.
-    - Choose the 'Build Now' option to trigger the pipeline.
