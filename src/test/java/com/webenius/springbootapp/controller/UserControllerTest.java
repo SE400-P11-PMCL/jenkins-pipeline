@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = CrudAppApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerTest {
-
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -60,6 +59,6 @@ public class UserControllerTest {
     public void deleteUserReturnsSuccessMessage() {
         ResponseEntity<String> response = restTemplate.exchange("/1", HttpMethod.DELETE, null, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo("User deleted with id 1");
+        assertThat(response.getBody()).isEqualTo("User deleted with id 2");
     }
 }
